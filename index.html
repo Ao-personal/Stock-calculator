@@ -7,26 +7,27 @@
     <!-- 引入 Tailwind CSS 樣式 -->
     <script src="https://cdn.tailwindcss.com"></script>
     
-    <!-- 引入 React 與 ReactDOM (負責顯示 React 畫面) -->
+    <!-- 引入 React 與 ReactDOM -->
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     
-    <!-- 引入 Babel (讓瀏覽器能看懂 JSX 語法) -->
+    <!-- 引入 Babel -->
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     
     <style>
         body { font-family: 'PingFang TC', 'Microsoft JhengHei', sans-serif; background-color: #f8fafc; }
+        /* 隱藏捲軸但保留滾動功能，讓表格在手機上更好看 */
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
     </style>
 </head>
 <body>
-    <!-- React 渲染的目標區塊 -->
     <div id="root"></div>
 
-    <!-- 撰寫 React 程式碼的地方，加上 type="text/babel" -->
     <script type="text/babel">
         const { useState, useEffect } = React;
 
-        // 1. 將 Lucide 圖示替換為純 SVG 元件 (因為在純 HTML 中無法直接 import)
+        // 圖示元件
         const Plus = ({className}) => <svg className={className} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>;
         const Trash2 = ({className}) => <svg className={className} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>;
         const Calculator = ({className}) => <svg className={className} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="4" y="2" width="16" height="20" rx="2" ry="2"></rect><line x1="8" y1="6" x2="16" y2="6"></line><line x1="16" y1="14" x2="16" y2="18"></line><path d="M16 10h.01"></path><path d="M12 10h.01"></path><path d="M8 10h.01"></path><path d="M12 14h.01"></path><path d="M8 14h.01"></path><path d="M12 18h.01"></path><path d="M8 18h.01"></path></svg>;
@@ -36,10 +37,9 @@
         const FileText = ({className}) => <svg className={className} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>;
         const Save = ({className}) => <svg className={className} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>;
         const BarChart3 = ({className}) => <svg className={className} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>;
+        const Target = ({className}) => <svg className={className} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="6"></circle><circle cx="12" cy="12" r="2"></circle></svg>;
 
-        // 2. 主程式碼 (移除 export default，改為一般 function)
         function App() {
-            // 預設資料
             const [buyOrders, setBuyOrders] = useState([
                 { id: 1, price: 119, shares: 200 },
                 { id: 2, price: 156.5, shares: 800 },
@@ -50,14 +50,11 @@
                 { id: 2, price: 180, shares: 500 },
             ]);
 
-            const [feeDiscount, setFeeDiscount] = useState(20); // 預設改為 2折 (20%)
-            const [minFee, setMinFee] = useState(1); // 預設改為 1元低消 (大戶投標準)
+            const [feeDiscount, setFeeDiscount] = useState(20);
+            const [minFee, setMinFee] = useState(1);
             const [brokerPreset, setBrokerPreset] = useState('dawho');
-            
-            // 交易計畫的狀態 (升級為陣列，支援多筆紀錄、編輯與刪除)
             const [savedPlans, setSavedPlans] = useState([]);
 
-            // 計算邏輯
             const FEE_RATE = 0.001425;
             const TAX_RATE = 0.003;
 
@@ -65,28 +62,20 @@
                 const preset = e.target.value;
                 setBrokerPreset(preset);
                 if (preset === 'dawho') {
-                setFeeDiscount(20); // 大戶投常見2折
-                setMinFee(1);       // 低消1元
+                    setFeeDiscount(20); setMinFee(1);
                 } else if (preset === 'cathay') {
-                setFeeDiscount(28); // 國泰證券常見2.8折
-                setMinFee(1);       // 低消1元
+                    setFeeDiscount(28); setMinFee(1);
                 } else if (preset === 'standard') {
-                setFeeDiscount(100); // 無折扣
-                setMinFee(20);       // 低消20元
+                    setFeeDiscount(100); setMinFee(20);
                 }
             };
 
             const calculateBuy = (order) => {
                 const gross = (order.price || 0) * (order.shares || 0);
                 if (gross === 0) return { gross: 0, fee: 0, cost: 0 };
-                
-                // 台灣券商常見算法：先算原價取整數(通常是無條件捨去或四捨五入，這裡先用無條件捨去)，再乘折扣取整數
                 const originalFee = Math.floor(gross * FEE_RATE); 
                 let finalFee = Math.floor(originalFee * (feeDiscount / 100));
-                
-                // 套用最低手續費限制
                 finalFee = Math.max(finalFee, minFee); 
-                
                 const cost = gross + finalFee;
                 return { gross, fee: finalFee, cost };
             };
@@ -94,120 +83,139 @@
             const calculateSell = (order) => {
                 const gross = (order.price || 0) * (order.shares || 0);
                 if (gross === 0) return { gross: 0, fee: 0, tax: 0, revenue: 0 };
-                
-                // 台灣券商常見算法：先算原價取整數，再乘折扣取整數
                 const originalFee = Math.floor(gross * FEE_RATE);
                 let finalFee = Math.floor(originalFee * (feeDiscount / 100));
-                
-                // 套用最低手續費限制
                 finalFee = Math.max(finalFee, minFee); 
-                
-                // 證交稅通常是無條件捨去
                 const tax = Math.floor(gross * TAX_RATE);
                 const revenue = gross - finalFee - tax;
                 return { gross, fee: finalFee, tax, revenue };
             };
 
-            // 更新單筆訂單
             const updateOrder = (type, id, field, value) => {
                 const numValue = value === '' ? '' : Number(value);
-                if (type === 'buy') {
-                setBuyOrders(buyOrders.map(o => o.id === id ? { ...o, [field]: numValue } : o));
-                } else {
-                setSellOrders(sellOrders.map(o => o.id === id ? { ...o, [field]: numValue } : o));
-                }
+                if (type === 'buy') setBuyOrders(buyOrders.map(o => o.id === id ? { ...o, [field]: numValue } : o));
+                else setSellOrders(sellOrders.map(o => o.id === id ? { ...o, [field]: numValue } : o));
             };
 
-            // 新增訂單
             const addOrder = (type) => {
                 const newId = Date.now();
-                if (type === 'buy') {
-                setBuyOrders([...buyOrders, { id: newId, price: '', shares: '' }]);
-                } else {
-                setSellOrders([...sellOrders, { id: newId, price: '', shares: '' }]);
-                }
+                if (type === 'buy') setBuyOrders([...buyOrders, { id: newId, price: '', shares: '' }]);
+                else setSellOrders([...sellOrders, { id: newId, price: '', shares: '' }]);
             };
 
-            // 刪除訂單
             const removeOrder = (type, id) => {
-                if (type === 'buy') {
-                setBuyOrders(buyOrders.filter(o => o.id !== id));
-                } else {
-                setSellOrders(sellOrders.filter(o => o.id !== id));
-                }
+                if (type === 'buy') setBuyOrders(buyOrders.filter(o => o.id !== id));
+                else setSellOrders(sellOrders.filter(o => o.id !== id));
             };
 
-            // 總計計算
             const totalBuy = buyOrders.reduce((acc, order) => {
                 const calc = calculateBuy(order);
                 return {
-                gross: acc.gross + calc.gross,
-                fee: acc.fee + calc.fee,
-                cost: acc.cost + calc.cost,
-                shares: acc.shares + (Number(order.shares) || 0)
+                    gross: acc.gross + calc.gross,
+                    fee: acc.fee + calc.fee,
+                    cost: acc.cost + calc.cost,
+                    shares: acc.shares + (Number(order.shares) || 0)
                 };
             }, { gross: 0, fee: 0, cost: 0, shares: 0 });
 
             const totalSell = sellOrders.reduce((acc, order) => {
                 const calc = calculateSell(order);
                 return {
-                gross: acc.gross + calc.gross,
-                fee: acc.fee + calc.fee,
-                tax: acc.tax + calc.tax,
-                revenue: acc.revenue + calc.revenue,
-                shares: acc.shares + (Number(order.shares) || 0)
+                    gross: acc.gross + calc.gross,
+                    fee: acc.fee + calc.fee,
+                    tax: acc.tax + calc.tax,
+                    revenue: acc.revenue + calc.revenue,
+                    shares: acc.shares + (Number(order.shares) || 0)
                 };
             }, { gross: 0, fee: 0, tax: 0, revenue: 0, shares: 0 });
 
             const netProfit = totalSell.revenue - totalBuy.cost;
             const roi = totalBuy.cost > 0 ? ((netProfit / totalBuy.cost) * 100).toFixed(2) : 0;
             
-            // 判斷賺賠顏色 (台灣股市：紅漲/賺、綠跌/賠)
             const isProfit = netProfit >= 0;
             const profitColor = isProfit ? 'text-red-500' : 'text-green-500';
             const profitBgColor = isProfit ? 'bg-red-50' : 'bg-green-50';
             const profitBorderColor = isProfit ? 'border-red-200' : 'border-green-200';
 
-            // 儲存當前試算為新計畫卡片
             const saveCurrentPlan = () => {
                 let text = "🟢 買進規劃：\n";
-                buyOrders.forEach(o => {
-                if (o.price && o.shares) text += ` - ${o.price}元 × ${o.shares}股\n`;
-                });
+                buyOrders.forEach(o => { if (o.price && o.shares) text += ` - ${o.price}元 × ${o.shares}股\n`; });
                 text += ` ➔ 總成本：${totalBuy.cost.toLocaleString()} 元\n\n`;
-
                 text += "🔴 賣出規劃：\n";
-                sellOrders.forEach(o => {
-                if (o.price && o.shares) text += ` - ${o.price}元 × ${o.shares}股\n`;
-                });
+                sellOrders.forEach(o => { if (o.price && o.shares) text += ` - ${o.price}元 × ${o.shares}股\n`; });
                 text += ` ➔ 總實收：${totalSell.revenue.toLocaleString()} 元\n\n`;
-
                 text += "💰 預估結果：\n";
                 text += ` ➔ 淨損益：${isProfit ? '+' : ''}${netProfit.toLocaleString()} 元\n`;
                 text += ` ➔ 報酬率：${isProfit ? '+' : ''}${roi}%\n`;
-
-                const newPlan = {
-                id: Date.now(),
-                date: new Date().toLocaleString('zh-TW', { hour12: false, month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' }),
-                content: text
-                };
-                
-                setSavedPlans([newPlan, ...savedPlans]); // 新的排在最上面
+                const newPlan = { id: Date.now(), date: new Date().toLocaleString('zh-TW', { hour12: false, month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' }), content: text };
+                setSavedPlans([newPlan, ...savedPlans]);
             };
 
-            const updateSavedPlan = (id, newContent) => {
-                setSavedPlans(savedPlans.map(p => p.id === id ? { ...p, content: newContent } : p));
-            };
+            const updateSavedPlan = (id, newContent) => setSavedPlans(savedPlans.map(p => p.id === id ? { ...p, content: newContent } : p));
+            const deleteSavedPlan = (id) => setSavedPlans(savedPlans.filter(p => p.id !== id));
 
-            const deleteSavedPlan = (id) => {
-                setSavedPlans(savedPlans.filter(p => p.id !== id));
-            };
-
-            // 圖表長度與進度計算
             const maxChartValue = Math.max(totalBuy.cost, totalSell.revenue, 1);
             const costBarWidth = `${(totalBuy.cost / maxChartValue) * 100}%`;
             const revenueBarWidth = `${(totalSell.revenue / maxChartValue) * 100}%`;
             const sellProgress = totalBuy.shares > 0 ? Math.min((totalSell.shares / totalBuy.shares) * 100, 100) : 0;
+
+            // --- 新增：取得台股股價跳動單位 ---
+            const getTickSize = (price) => {
+                if (price < 10) return 0.01;
+                if (price < 50) return 0.05;
+                if (price < 100) return 0.1;
+                if (price < 500) return 0.5;
+                if (price < 1000) return 1;
+                return 5;
+            };
+
+            // --- 新增：產生目標停利試算表 (5% ~ 8%) ---
+            const generateProjectionTable = () => {
+                if (totalBuy.shares === 0 || totalBuy.cost === 0) return [];
+                
+                // 找出大約 4.5% 報酬率的起點價格
+                const effectiveRate = 1 - TAX_RATE - (FEE_RATE * (feeDiscount / 100));
+                const targetRevenueStart = totalBuy.cost * 1.045; 
+                let startPriceApprox = targetRevenueStart / (totalBuy.shares * effectiveRate);
+                
+                let tick = getTickSize(startPriceApprox);
+                // 向上取整到符合跳動單位
+                let currentPrice = Math.ceil(startPriceApprox / tick) * tick;
+                
+                let rows = [];
+                // 最多產生 30 筆，避免無窮迴圈
+                for (let i = 0; i < 30; i++) {
+                    // 修正 JS 浮點數精度問題
+                    currentPrice = Math.round(currentPrice * 100) / 100;
+                    
+                    const gross = currentPrice * totalBuy.shares;
+                    const originalFee = Math.floor(gross * FEE_RATE);
+                    let finalFee = Math.floor(originalFee * (feeDiscount / 100));
+                    finalFee = Math.max(finalFee, minFee);
+                    const tax = Math.floor(gross * TAX_RATE);
+                    
+                    const revenue = gross - finalFee - tax;
+                    const profit = revenue - totalBuy.cost;
+                    const roi = (profit / totalBuy.cost) * 100;
+                    
+                    rows.push({
+                        sellPrice: currentPrice.toFixed(2),
+                        profit: profit,
+                        roi: roi.toFixed(1), // 小數點後1位
+                        buyFee: totalBuy.fee,
+                        sellFee: finalFee,
+                        tax: tax,
+                        // 總投資成本 = 買進總成本 + 賣出手續費 + 交易稅 (符合多數 APP 邏輯)
+                        costIncludingAll: totalBuy.cost + finalFee + tax 
+                    });
+                    
+                    // 當報酬率超過 8.5% 且至少產生 6 筆資料時，停止產生
+                    if (roi >= 8.5 && i >= 6) break; 
+                    
+                    currentPrice += getTickSize(currentPrice);
+                }
+                return rows;
+            };
 
             return (
                 <div className="min-h-screen p-4 md:p-8">
@@ -267,304 +275,285 @@
                     </div>
                     </div>
 
-                    {/* Main Content */}
+                    {/* Main Content Grid */}
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     
-                    {/* Left Column: Inputs */}
-                    {/* 💡 加上 order-2 md:order-1：手機版排第 2，平板以上排第 1 */}
-                    <div className="md:col-span-2 space-y-6 order-2 md:order-1">
-                        
-                        {/* Buy Section */}
-                        <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
-                        <div className="bg-blue-50/50 p-4 border-b border-slate-100 flex justify-between items-center">
-                            <h2 className="text-lg font-bold text-slate-700 flex items-center gap-2">
-                            <span className="w-3 h-3 rounded-full bg-blue-500"></span>
-                            買進紀錄 (可作攤平試算)
-                            </h2>
-                            <button 
-                            onClick={() => addOrder('buy')}
-                            className="text-sm flex items-center gap-1 text-blue-600 hover:text-blue-700 bg-blue-100/50 px-3 py-1.5 rounded-lg transition-colors"
-                            >
-                            <Plus className="w-4 h-4" /> 新增買進
-                            </button>
-                        </div>
-                        
-                        <div className="p-4 space-y-3">
-                            {buyOrders.map((order, index) => {
-                            const calc = calculateBuy(order);
-                            return (
-                                <div key={order.id} className="flex flex-col md:flex-row gap-3 items-center p-3 hover:bg-slate-50 rounded-xl border border-transparent hover:border-slate-100 transition-colors">
-                                <div className="flex gap-3 w-full md:w-auto flex-1">
-                                    <div className="flex-1">
-                                    <label className="block text-xs text-slate-400 mb-1">價格 (元)</label>
-                                    <input 
-                                        type="number" step="0.1"
-                                        value={order.price} onChange={(e) => updateOrder('buy', order.id, 'price', e.target.value)}
-                                        className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-100 focus:border-blue-400 outline-none transition-all"
-                                        placeholder="成交價"
-                                    />
-                                    </div>
-                                    <div className="flex-1">
-                                    <label className="block text-xs text-slate-400 mb-1">股數</label>
-                                    <input 
-                                        type="number" step="1"
-                                        value={order.shares} onChange={(e) => updateOrder('buy', order.id, 'shares', e.target.value)}
-                                        className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-100 focus:border-blue-400 outline-none transition-all"
-                                        placeholder="股"
-                                    />
-                                    </div>
-                                </div>
-                                <div className="flex w-full md:w-auto items-center justify-between md:justify-end gap-4 pl-2">
-                                    <div className="text-right text-sm">
-                                    <div className="text-slate-500">總支出: <span className="font-semibold text-slate-700">{calc.cost.toLocaleString()}</span></div>
-                                    <div className="text-xs text-slate-400">含手續費: {calc.fee.toLocaleString()}</div>
-                                    </div>
-                                    <button 
-                                    onClick={() => removeOrder('buy', order.id)}
-                                    className="p-2 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
-                                    title="刪除"
-                                    >
-                                    <Trash2 className="w-5 h-5" />
-                                    </button>
-                                </div>
-                                </div>
-                            );
-                            })}
-                            {buyOrders.length === 0 && (
-                            <div className="text-center py-6 text-slate-400 text-sm">尚未新增買進紀錄</div>
-                            )}
-
-                            {/* 買進均價 (攤平) 總結 */}
-                            {totalBuy.shares > 0 && (
-                            <div className="mt-4 p-4 bg-blue-50/50 rounded-xl border border-blue-100 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                                <div className="text-sm text-blue-800 font-medium">
-                                🛒 目前持有 <span className="text-lg font-bold">{totalBuy.shares.toLocaleString()}</span> 股
-                                </div>
-                                <div className="text-right w-full sm:w-auto">
-                                <div className="text-xs text-blue-600 mb-1">攤平後買進均價 (含手續費)</div>
-                                <div className="text-2xl font-black text-blue-700">
-                                    {(totalBuy.cost / totalBuy.shares).toFixed(2)} <span className="text-sm font-medium text-blue-600">元/股</span>
-                                </div>
-                                </div>
-                            </div>
-                            )}
-                        </div>
-                        </div>
-
-                        {/* Sell Section */}
-                        <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
-                        <div className="bg-orange-50/50 p-4 border-b border-slate-100 flex justify-between items-center">
-                            <h2 className="text-lg font-bold text-slate-700 flex items-center gap-2">
-                            <span className="w-3 h-3 rounded-full bg-orange-400"></span>
-                            賣出計畫
-                            </h2>
-                            <button 
-                            onClick={() => addOrder('sell')}
-                            className="text-sm flex items-center gap-1 text-orange-600 hover:text-orange-700 bg-orange-100/50 px-3 py-1.5 rounded-lg transition-colors"
-                            >
-                            <Plus className="w-4 h-4" /> 新增賣出
-                            </button>
-                        </div>
-                        
-                        <div className="p-4 space-y-3">
-                            {sellOrders.map((order, index) => {
-                            const calc = calculateSell(order);
-                            return (
-                                <div key={order.id} className="flex flex-col md:flex-row gap-3 items-center p-3 hover:bg-slate-50 rounded-xl border border-transparent hover:border-slate-100 transition-colors">
-                                <div className="flex gap-3 w-full md:w-auto flex-1">
-                                    <div className="flex-1">
-                                    <label className="block text-xs text-slate-400 mb-1">價格 (元)</label>
-                                    <input 
-                                        type="number" step="0.1"
-                                        value={order.price} onChange={(e) => updateOrder('sell', order.id, 'price', e.target.value)}
-                                        className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-orange-100 focus:border-orange-400 outline-none transition-all"
-                                        placeholder="成交價"
-                                    />
-                                    </div>
-                                    <div className="flex-1">
-                                    <label className="block text-xs text-slate-400 mb-1">股數</label>
-                                    <input 
-                                        type="number" step="1"
-                                        value={order.shares} onChange={(e) => updateOrder('sell', order.id, 'shares', e.target.value)}
-                                        className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-orange-100 focus:border-orange-400 outline-none transition-all"
-                                        placeholder="股"
-                                    />
-                                    </div>
-                                </div>
-                                <div className="flex w-full md:w-auto items-center justify-between md:justify-end gap-4 pl-2">
-                                    <div className="text-right text-sm">
-                                    <div className="text-slate-500">實收: <span className="font-semibold text-slate-700">{calc.revenue.toLocaleString()}</span></div>
-                                    <div className="text-xs text-slate-400">費: {calc.fee} / 稅: {calc.tax}</div>
-                                    </div>
-                                    <button 
-                                    onClick={() => removeOrder('sell', order.id)}
-                                    className="p-2 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
-                                    title="刪除"
-                                    >
-                                    <Trash2 className="w-5 h-5" />
-                                    </button>
-                                </div>
-                                </div>
-                            );
-                            })}
-                            {sellOrders.length === 0 && (
-                            <div className="text-center py-6 text-slate-400 text-sm">尚未新增賣出計畫</div>
-                            )}
-
-                            {/* 賣出均價總結 */}
-                            {totalSell.shares > 0 && (
-                            <div className="mt-4 p-4 bg-orange-50/50 rounded-xl border border-orange-100 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                                <div className="text-sm text-orange-800 font-medium">
-                                💰 預計賣出 <span className="text-lg font-bold">{totalSell.shares.toLocaleString()}</span> 股
-                                </div>
-                                <div className="text-right w-full sm:w-auto">
-                                <div className="text-xs text-orange-600 mb-1">賣出均價 (扣除稅費後實收)</div>
-                                <div className="text-2xl font-black text-orange-700">
-                                    {(totalSell.revenue / totalSell.shares).toFixed(2)} <span className="text-sm font-medium text-orange-600">元/股</span>
-                                </div>
-                                </div>
-                            </div>
-                            )}
-                        </div>
-                        </div>
-
-                        {/* Trading Plan & Notes Section */}
-                        <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
-                        <div className="bg-purple-50/50 p-4 border-b border-slate-100 flex justify-between items-center">
-                            <div className="flex items-center gap-2">
-                            <FileText className="w-5 h-5 text-purple-500" />
-                            <h2 className="text-lg font-bold text-slate-700">
-                                我的交易計畫庫
-                            </h2>
-                            </div>
-                            <button 
-                            onClick={saveCurrentPlan}
-                            className="text-sm font-medium flex items-center gap-1 text-purple-600 hover:text-purple-700 bg-purple-100/50 hover:bg-purple-100 px-3 py-1.5 rounded-lg transition-colors"
-                            >
-                            <Save className="w-4 h-4" /> 儲存當前試算
-                            </button>
-                        </div>
-                        <div className="p-4 space-y-4 bg-slate-50">
-                            {savedPlans.length === 0 ? (
-                            <div className="text-center py-8 text-slate-400 text-sm border-2 border-dashed border-slate-200 rounded-xl">
-                                尚未儲存任何計畫，點擊右上方按鈕儲存當前試算
-                            </div>
-                            ) : (
-                            savedPlans.map(plan => (
-                                <div key={plan.id} className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm hover:border-purple-200 transition-colors">
-                                <div className="bg-slate-50 px-3 py-2 border-b border-slate-100 flex justify-between items-center">
-                                    <span className="text-xs font-bold text-slate-500">🗓 {plan.date} 紀錄</span>
-                                    <button 
-                                    onClick={() => deleteSavedPlan(plan.id)}
-                                    className="text-slate-300 hover:text-red-500 p-1 rounded hover:bg-red-50 transition-colors"
-                                    title="刪除計畫"
-                                    >
-                                    <Trash2 className="w-4 h-4" />
-                                    </button>
-                                </div>
-                                <textarea
-                                    value={plan.content}
-                                    onChange={(e) => updateSavedPlan(plan.id, e.target.value)}
-                                    className="w-full h-40 p-3 bg-white outline-none resize-y text-sm text-slate-700 leading-relaxed focus:bg-purple-50/20 transition-colors"
-                                    placeholder="請輸入您的筆記..."
-                                />
-                                </div>
-                            ))
-                            )}
-                        </div>
-                        </div>
-
-                    </div>
-
-                    {/* Right Column: Summary Dashboard */}
-                    {/* 💡 加上 order-1 md:order-2：手機版排第 1，平板以上排第 2 */}
-                    <div className="md:col-span-1 order-1 md:order-2">
-                        <div className={`bg-white rounded-2xl shadow-sm border ${profitBorderColor} overflow-hidden sticky top-6`}>
-                        <div className={`p-6 border-b ${profitBorderColor} ${profitBgColor} flex flex-col items-end`}>
-                            <div className="flex items-center gap-2 text-slate-600 mb-2">
-                            <h3 className="font-bold">預估總損益</h3>
-                            {isProfit ? <TrendingUp className="w-5 h-5 text-red-500" /> : <TrendingDown className="w-5 h-5 text-green-500" />}
-                            </div>
-                            <div className={`text-4xl font-black ${profitColor} text-right`}>
-                            {isProfit ? '+' : ''}{netProfit.toLocaleString()}
-                            </div>
-                            <div className="mt-2 text-sm font-medium text-slate-600 text-right">
-                            報酬率: <span className={profitColor}>{isProfit ? '+' : ''}{roi}%</span>
-                            </div>
-                        </div>
-                        
-                        <div className="p-6 space-y-5">
+                        {/* Left Column: Inputs */}
+                        <div className="md:col-span-2 space-y-6 order-2 md:order-1">
                             
-                            {/* 視覺化比較圖表 */}
-                            <div className="space-y-4 pb-5 border-b border-slate-100">
-                            <div className="flex items-center gap-2 text-sm font-bold text-slate-700 mb-2">
-                                <BarChart3 className="w-4 h-4 text-slate-400" />
-                                資金流水比較
+                            {/* Buy Section */}
+                            <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+                            <div className="bg-blue-50/50 p-4 border-b border-slate-100 flex justify-between items-center">
+                                <h2 className="text-lg font-bold text-slate-700 flex items-center gap-2">
+                                <span className="w-3 h-3 rounded-full bg-blue-500"></span>
+                                買進紀錄 (可作攤平試算)
+                                </h2>
+                                <button onClick={() => addOrder('buy')} className="text-sm flex items-center gap-1 text-blue-600 hover:text-blue-700 bg-blue-100/50 px-3 py-1.5 rounded-lg transition-colors">
+                                <Plus className="w-4 h-4" /> 新增買進
+                                </button>
                             </div>
                             
-                            <div className="space-y-1">
-                                <div className="flex justify-between text-xs text-slate-500">
-                                <span>總買進成本</span>
-                                <span className="font-semibold text-slate-700">{totalBuy.cost.toLocaleString()}</span>
-                                </div>
-                                <div className="w-full bg-slate-100 rounded-full h-2.5">
-                                <div className="bg-blue-400 h-2.5 rounded-full transition-all duration-700" style={{ width: costBarWidth }}></div>
-                                </div>
-                            </div>
+                            <div className="p-4 space-y-3">
+                                {buyOrders.map((order) => {
+                                const calc = calculateBuy(order);
+                                return (
+                                    <div key={order.id} className="flex flex-col md:flex-row gap-3 items-center p-3 hover:bg-slate-50 rounded-xl border border-transparent hover:border-slate-100 transition-colors">
+                                    <div className="flex gap-3 w-full md:w-auto flex-1">
+                                        <div className="flex-1">
+                                        <label className="block text-xs text-slate-400 mb-1">價格 (元)</label>
+                                        <input type="number" step="0.1" value={order.price} onChange={(e) => updateOrder('buy', order.id, 'price', e.target.value)} className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-100 focus:border-blue-400 outline-none transition-all" placeholder="成交價" />
+                                        </div>
+                                        <div className="flex-1">
+                                        <label className="block text-xs text-slate-400 mb-1">股數</label>
+                                        <input type="number" step="1" value={order.shares} onChange={(e) => updateOrder('buy', order.id, 'shares', e.target.value)} className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-100 focus:border-blue-400 outline-none transition-all" placeholder="股" />
+                                        </div>
+                                    </div>
+                                    <div className="flex w-full md:w-auto items-center justify-between md:justify-end gap-4 pl-2">
+                                        <div className="text-right text-sm">
+                                        <div className="text-slate-500">總支出: <span className="font-semibold text-slate-700">{calc.cost.toLocaleString()}</span></div>
+                                        <div className="text-xs text-slate-400">含手續費: {calc.fee.toLocaleString()}</div>
+                                        </div>
+                                        <button onClick={() => removeOrder('buy', order.id)} className="p-2 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors" title="刪除"><Trash2 className="w-5 h-5" /></button>
+                                    </div>
+                                    </div>
+                                );
+                                })}
+                                {buyOrders.length === 0 && <div className="text-center py-6 text-slate-400 text-sm">尚未新增買進紀錄</div>}
 
-                            <div className="space-y-1">
-                                <div className="flex justify-between text-xs text-slate-500">
-                                <span>總賣出實收</span>
-                                <span className="font-semibold text-slate-700">{totalSell.revenue.toLocaleString()}</span>
+                                {/* 買進均價總結 */}
+                                {totalBuy.shares > 0 && (
+                                <div className="mt-4 p-4 bg-blue-50/50 rounded-xl border border-blue-100 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                                    <div className="text-sm text-blue-800 font-medium">
+                                    🛒 目前持有 <span className="text-lg font-bold">{totalBuy.shares.toLocaleString()}</span> 股
+                                    </div>
+                                    <div className="text-right w-full sm:w-auto">
+                                    <div className="text-xs text-blue-600 mb-1">攤平後買進均價 (含手續費)</div>
+                                    <div className="text-2xl font-black text-blue-700">
+                                        {(totalBuy.cost / totalBuy.shares).toFixed(2)} <span className="text-sm font-medium text-blue-600">元/股</span>
+                                    </div>
+                                    </div>
                                 </div>
-                                <div className="w-full bg-slate-100 rounded-full h-2.5">
-                                <div className={`h-2.5 rounded-full transition-all duration-700 ${isProfit ? 'bg-red-400' : 'bg-green-400'}`} style={{ width: revenueBarWidth }}></div>
-                                </div>
-                            </div>
-                            </div>
-                            
-                            <div className="pt-1 space-y-2">
-                            <div className="flex justify-between text-xs text-slate-500">
-                                <span>總手續費 (買+賣)</span>
-                                <span>{(totalBuy.fee + totalSell.fee).toLocaleString()}</span>
-                            </div>
-                            <div className="flex justify-between text-xs text-slate-500">
-                                <span>總證交稅 (賣出)</span>
-                                <span>{totalSell.tax.toLocaleString()}</span>
-                            </div>
-                            
-                            <div className="mt-4 pt-4 border-t border-slate-100">
-                                <div className="flex justify-between text-xs mb-1.5">
-                                <span className={`${totalBuy.shares !== totalSell.shares ? 'text-orange-500 font-bold' : 'text-slate-500'}`}>
-                                    買進 {totalBuy.shares} 股 / 賣出 {totalSell.shares} 股
-                                </span>
-                                {totalBuy.shares !== totalSell.shares && (
-                                    <span className="text-orange-500 font-medium">庫存不平</span>
                                 )}
+                            </div>
+                            </div>
+
+                            {/* Sell Section */}
+                            <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+                            <div className="bg-orange-50/50 p-4 border-b border-slate-100 flex justify-between items-center">
+                                <h2 className="text-lg font-bold text-slate-700 flex items-center gap-2">
+                                <span className="w-3 h-3 rounded-full bg-orange-400"></span>
+                                賣出計畫
+                                </h2>
+                                <button onClick={() => addOrder('sell')} className="text-sm flex items-center gap-1 text-orange-600 hover:text-orange-700 bg-orange-100/50 px-3 py-1.5 rounded-lg transition-colors">
+                                <Plus className="w-4 h-4" /> 新增賣出
+                                </button>
+                            </div>
+                            
+                            <div className="p-4 space-y-3">
+                                {sellOrders.map((order) => {
+                                const calc = calculateSell(order);
+                                return (
+                                    <div key={order.id} className="flex flex-col md:flex-row gap-3 items-center p-3 hover:bg-slate-50 rounded-xl border border-transparent hover:border-slate-100 transition-colors">
+                                    <div className="flex gap-3 w-full md:w-auto flex-1">
+                                        <div className="flex-1">
+                                        <label className="block text-xs text-slate-400 mb-1">價格 (元)</label>
+                                        <input type="number" step="0.1" value={order.price} onChange={(e) => updateOrder('sell', order.id, 'price', e.target.value)} className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-orange-100 focus:border-orange-400 outline-none transition-all" placeholder="成交價" />
+                                        </div>
+                                        <div className="flex-1">
+                                        <label className="block text-xs text-slate-400 mb-1">股數</label>
+                                        <input type="number" step="1" value={order.shares} onChange={(e) => updateOrder('sell', order.id, 'shares', e.target.value)} className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-orange-100 focus:border-orange-400 outline-none transition-all" placeholder="股" />
+                                        </div>
+                                    </div>
+                                    <div className="flex w-full md:w-auto items-center justify-between md:justify-end gap-4 pl-2">
+                                        <div className="text-right text-sm">
+                                        <div className="text-slate-500">實收: <span className="font-semibold text-slate-700">{calc.revenue.toLocaleString()}</span></div>
+                                        <div className="text-xs text-slate-400">費: {calc.fee} / 稅: {calc.tax}</div>
+                                        </div>
+                                        <button onClick={() => removeOrder('sell', order.id)} className="p-2 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors" title="刪除"><Trash2 className="w-5 h-5" /></button>
+                                    </div>
+                                    </div>
+                                );
+                                })}
+                                {sellOrders.length === 0 && <div className="text-center py-6 text-slate-400 text-sm">尚未新增賣出計畫</div>}
+
+                                {totalSell.shares > 0 && (
+                                <div className="mt-4 p-4 bg-orange-50/50 rounded-xl border border-orange-100 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                                    <div className="text-sm text-orange-800 font-medium">
+                                    💰 預計賣出 <span className="text-lg font-bold">{totalSell.shares.toLocaleString()}</span> 股
+                                    </div>
+                                    <div className="text-right w-full sm:w-auto">
+                                    <div className="text-xs text-orange-600 mb-1">賣出均價 (扣除稅費後實收)</div>
+                                    <div className="text-2xl font-black text-orange-700">
+                                        {(totalSell.revenue / totalSell.shares).toFixed(2)} <span className="text-sm font-medium text-orange-600">元/股</span>
+                                    </div>
+                                    </div>
+                                </div>
+                                )}
+                            </div>
+                            </div>
+
+                            {/* Plan Library */}
+                            <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+                            <div className="bg-purple-50/50 p-4 border-b border-slate-100 flex justify-between items-center">
+                                <div className="flex items-center gap-2">
+                                <FileText className="w-5 h-5 text-purple-500" />
+                                <h2 className="text-lg font-bold text-slate-700">我的交易計畫庫</h2>
+                                </div>
+                                <button onClick={saveCurrentPlan} className="text-sm font-medium flex items-center gap-1 text-purple-600 hover:text-purple-700 bg-purple-100/50 hover:bg-purple-100 px-3 py-1.5 rounded-lg transition-colors">
+                                <Save className="w-4 h-4" /> 儲存當前試算
+                                </button>
+                            </div>
+                            <div className="p-4 space-y-4 bg-slate-50">
+                                {savedPlans.length === 0 ? (
+                                <div className="text-center py-8 text-slate-400 text-sm border-2 border-dashed border-slate-200 rounded-xl">尚未儲存任何計畫，點擊右上方按鈕儲存當前試算</div>
+                                ) : (
+                                savedPlans.map(plan => (
+                                    <div key={plan.id} className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm hover:border-purple-200 transition-colors">
+                                    <div className="bg-slate-50 px-3 py-2 border-b border-slate-100 flex justify-between items-center">
+                                        <span className="text-xs font-bold text-slate-500">🗓 {plan.date} 紀錄</span>
+                                        <button onClick={() => deleteSavedPlan(plan.id)} className="text-slate-300 hover:text-red-500 p-1 rounded hover:bg-red-50 transition-colors" title="刪除計畫"><Trash2 className="w-4 h-4" /></button>
+                                    </div>
+                                    <textarea value={plan.content} onChange={(e) => updateSavedPlan(plan.id, e.target.value)} className="w-full h-40 p-3 bg-white outline-none resize-y text-sm text-slate-700 leading-relaxed focus:bg-purple-50/20 transition-colors" placeholder="請輸入您的筆記..." />
+                                    </div>
+                                ))
+                                )}
+                            </div>
+                            </div>
+                        </div>
+
+                        {/* Right Column: Summary Dashboard */}
+                        <div className="md:col-span-1 order-1 md:order-2">
+                            <div className={`bg-white rounded-2xl shadow-sm border ${profitBorderColor} overflow-hidden sticky top-6`}>
+                            <div className={`p-6 border-b ${profitBorderColor} ${profitBgColor} flex flex-col items-end`}>
+                                <div className="flex items-center gap-2 text-slate-600 mb-2">
+                                <h3 className="font-bold">預估總損益</h3>
+                                {isProfit ? <TrendingUp className="w-5 h-5 text-red-500" /> : <TrendingDown className="w-5 h-5 text-green-500" />}
+                                </div>
+                                <div className={`text-4xl font-black ${profitColor} text-right`}>
+                                {isProfit ? '+' : ''}{netProfit.toLocaleString()}
+                                </div>
+                                <div className="mt-2 text-sm font-medium text-slate-600 text-right">
+                                報酬率: <span className={profitColor}>{isProfit ? '+' : ''}{roi}%</span>
+                                </div>
+                            </div>
+                            
+                            <div className="p-6 space-y-5">
+                                <div className="space-y-4 pb-5 border-b border-slate-100">
+                                <div className="flex items-center gap-2 text-sm font-bold text-slate-700 mb-2">
+                                    <BarChart3 className="w-4 h-4 text-slate-400" />
+                                    資金流水比較
+                                </div>
+                                <div className="space-y-1">
+                                    <div className="flex justify-between text-xs text-slate-500">
+                                    <span>總買進成本</span>
+                                    <span className="font-semibold text-slate-700">{totalBuy.cost.toLocaleString()}</span>
+                                    </div>
+                                    <div className="w-full bg-slate-100 rounded-full h-2.5">
+                                    <div className="bg-blue-400 h-2.5 rounded-full transition-all duration-700" style={{ width: costBarWidth }}></div>
+                                    </div>
+                                </div>
+                                <div className="space-y-1">
+                                    <div className="flex justify-between text-xs text-slate-500">
+                                    <span>總賣出實收</span>
+                                    <span className="font-semibold text-slate-700">{totalSell.revenue.toLocaleString()}</span>
+                                    </div>
+                                    <div className="w-full bg-slate-100 rounded-full h-2.5">
+                                    <div className={`h-2.5 rounded-full transition-all duration-700 ${isProfit ? 'bg-red-400' : 'bg-green-400'}`} style={{ width: revenueBarWidth }}></div>
+                                    </div>
+                                </div>
                                 </div>
                                 
-                                {/* 庫存賣出進度條 */}
-                                {totalBuy.shares > 0 && (
-                                <div className="w-full bg-slate-100 rounded-full h-1.5 mt-2 overflow-hidden">
-                                    <div 
-                                    className={`h-1.5 rounded-full transition-all duration-700 ${totalBuy.shares === totalSell.shares ? 'bg-slate-400' : 'bg-orange-400'}`} 
-                                    style={{ width: `${sellProgress}%` }}
-                                    ></div>
+                                <div className="pt-1 space-y-2">
+                                <div className="flex justify-between text-xs text-slate-500">
+                                    <span>總手續費 (買+賣)</span>
+                                    <span>{(totalBuy.fee + totalSell.fee).toLocaleString()}</span>
                                 </div>
-                                )}
+                                <div className="flex justify-between text-xs text-slate-500">
+                                    <span>總證交稅 (賣出)</span>
+                                    <span>{totalSell.tax.toLocaleString()}</span>
+                                </div>
+                                
+                                <div className="mt-4 pt-4 border-t border-slate-100">
+                                    <div className="flex justify-between text-xs mb-1.5">
+                                    <span className={`${totalBuy.shares !== totalSell.shares ? 'text-orange-500 font-bold' : 'text-slate-500'}`}>
+                                        買進 {totalBuy.shares} 股 / 賣出 {totalSell.shares} 股
+                                    </span>
+                                    {totalBuy.shares !== totalSell.shares && <span className="text-orange-500 font-medium">庫存不平</span>}
+                                    </div>
+                                    {totalBuy.shares > 0 && (
+                                    <div className="w-full bg-slate-100 rounded-full h-1.5 mt-2 overflow-hidden">
+                                        <div className={`h-1.5 rounded-full transition-all duration-700 ${totalBuy.shares === totalSell.shares ? 'bg-slate-400' : 'bg-orange-400'}`} style={{ width: `${sellProgress}%` }}></div>
+                                    </div>
+                                    )}
+                                </div>
+                                </div>
                             </div>
                             </div>
                         </div>
-                        </div>
-                    </div>
 
                     </div>
+
+                    {/* --- 新增：目標停利試算表 --- */}
+                    {totalBuy.shares > 0 && (
+                        <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden mt-6 mb-12">
+                            <div className="bg-teal-50/50 p-4 border-b border-slate-100 flex justify-between items-center">
+                                <div className="flex items-center gap-2">
+                                    <Target className="w-5 h-5 text-teal-500" />
+                                    <h2 className="text-lg font-bold text-slate-700 tracking-wide">目標停利試算表 (5% ~ 8% 區間)</h2>
+                                </div>
+                                <div className="text-xs text-slate-500 hidden sm:block">
+                                    以此筆買進 <span className="text-teal-600 font-bold">{totalBuy.shares.toLocaleString()}</span> 股推算
+                                </div>
+                            </div>
+                            
+                            <div className="overflow-x-auto hide-scrollbar">
+                                <table className="w-full text-sm text-center whitespace-nowrap">
+                                    <thead>
+                                        <tr className="bg-slate-50 text-slate-500 border-b border-slate-200">
+                                            <th className="py-3 px-4 font-semibold tracking-wider">賣出價格</th>
+                                            <th className="py-3 px-4 font-semibold tracking-wider">損益金額</th>
+                                            <th className="py-3 px-4 font-semibold tracking-wider">報酬率</th>
+                                            <th className="py-3 px-4 font-semibold tracking-wider">買入手續費</th>
+                                            <th className="py-3 px-4 font-semibold tracking-wider">賣出手續費</th>
+                                            <th className="py-3 px-4 font-semibold tracking-wider">證券交易稅</th>
+                                            <th className="py-3 px-4 font-semibold tracking-wider">投資成本</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody className="text-slate-600">
+                                        {generateProjectionTable().map((row, idx) => {
+                                            // 將靠近 6%~7% 的這幾行改回顯眼的黃色打亮
+                                            const highlight = row.roi >= 6 && row.roi < 7;
+                                            
+                                            return (
+                                                <tr key={idx} className={`border-b border-slate-100 transition-colors ${highlight ? 'bg-amber-100 hover:bg-amber-200' : (idx % 2 === 0 ? 'bg-white hover:bg-slate-50' : 'bg-slate-50/30 hover:bg-slate-50')}`}>
+                                                    <td className="py-3 px-4 font-bold text-slate-700">{row.sellPrice}</td>
+                                                    <td className="py-3 px-4 font-bold text-red-500">
+                                                        {row.profit > 0 ? '+' : ''}{row.profit.toLocaleString()}
+                                                    </td>
+                                                    <td className="py-3 px-4 font-bold text-red-500">
+                                                        {row.profit > 0 ? '+' : ''}{row.roi}%
+                                                    </td>
+                                                    <td className="py-3 px-4">{row.buyFee.toLocaleString()}</td>
+                                                    <td className="py-3 px-4">{row.sellFee.toLocaleString()}</td>
+                                                    <td className="py-3 px-4">{row.tax.toLocaleString()}</td>
+                                                    <td className="py-3 px-4 text-slate-400">{row.costIncludingAll.toLocaleString()}</td>
+                                                </tr>
+                                            );
+                                        })}
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div className="bg-slate-50 p-3 text-xs text-slate-400 text-center border-t border-slate-100 sm:hidden">
+                                左右滑動可查看完整表格資訊 ➔
+                            </div>
+                        </div>
+                    )}
+
                 </div>
                 </div>
             );
         }
 
-        // 3. 啟動 React 程式
         const root = ReactDOM.createRoot(document.getElementById('root'));
         root.render(<App />);
     </script>
