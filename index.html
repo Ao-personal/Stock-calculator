@@ -42,26 +42,247 @@
         const Edit3 = ({className}) => <svg className={className} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>;
         const BookOpen = ({className}) => <svg className={className} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg>;
         const Award = ({className}) => <svg className={className} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="8" r="7"></circle><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"></polyline></svg>;
+        const Download = ({className}) => <svg className={className} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>;
+        const Cloud = ({className}) => <svg className={className} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"></path></svg>;
+        const LinkIcon = ({className}) => <svg className={className} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>;
+        const RefreshCw = ({className}) => <svg className={className} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>;
+        const Copy = ({className}) => <svg className={className} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>;
+        const Check = ({className}) => <svg className={className} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>;
 
         // ==========================================
-        // 歷史帳本元件 (全新功能)
+        // 雲端同步教學元件 (全新加入)
+        // ==========================================
+        function CloudSyncGuide() {
+            const [copied, setCopied] = useState(false);
+            const gasCode = `function doPost(e) {
+  // 取得目前作用中的試算表的第一個工作表
+  var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheets()[0];
+  
+  // 解析從網頁傳來的資料
+  var data = JSON.parse(e.postData.contents);
+  var action = data.action;
+
+  // 新增紀錄
+  if (action === 'insert') {
+    var record = data.record;
+    sheet.appendRow([record.id, record.date, record.stock, record.profit, record.note]);
+    return ContentService.createTextOutput(JSON.stringify({status: 'success'})).setMimeType(ContentService.MimeType.JSON);
+  }
+
+  // 刪除紀錄
+  if (action === 'delete') {
+    var idToDelete = data.id;
+    var dataRange = sheet.getDataRange();
+    var values = dataRange.getValues();
+    // 從後面往前找，避免刪除後列數錯亂
+    for (var i = values.length - 1; i >= 1; i--) {
+      if (values[i][0] == idToDelete) {
+        sheet.deleteRow(i + 1);
+        break;
+      }
+    }
+    return ContentService.createTextOutput(JSON.stringify({status: 'success'})).setMimeType(ContentService.MimeType.JSON);
+  }
+
+  // 讀取所有紀錄
+  if (action === 'read') {
+    var dataRange = sheet.getDataRange();
+    var values = dataRange.getValues();
+    var records = [];
+    // 略過第一列標題 (i=1 開始)
+    for (var i = 1; i < values.length; i++) {
+      if(values[i][0]){ // 確保 ID 存在
+        records.push({
+          id: Number(values[i][0]),
+          date: values[i][1],
+          stock: values[i][2],
+          profit: Number(values[i][3]),
+          note: values[i][4] || ''
+        });
+      }
+    }
+    return ContentService.createTextOutput(JSON.stringify({status: 'success', data: records})).setMimeType(ContentService.MimeType.JSON);
+  }
+
+  return ContentService.createTextOutput(JSON.stringify({status: 'error'})).setMimeType(ContentService.MimeType.JSON);
+}`;
+
+            const handleCopy = () => {
+                const textArea = document.createElement("textarea");
+                textArea.value = gasCode;
+                document.body.appendChild(textArea);
+                textArea.select();
+                try {
+                    document.execCommand('copy');
+                    setCopied(true);
+                    setTimeout(() => setCopied(false), 2000);
+                } catch (err) {
+                    console.error('複製失敗', err);
+                    alert('複製失敗，請手動全選複製。');
+                }
+                document.body.removeChild(textArea);
+            };
+
+            return (
+                <div className="p-4 md:p-8">
+                    <div className="max-w-4xl mx-auto space-y-6">
+                        <div className="bg-white p-6 md:p-8 rounded-2xl shadow-sm border border-slate-100">
+                            <h1 className="text-2xl font-bold text-slate-800 flex items-center gap-2 mb-8">
+                                <Cloud className="w-6 h-6 text-sky-500" /> Google Sheet 雲端同步教學
+                            </h1>
+
+                            <div className="space-y-8">
+                                {/* Step 1 */}
+                                <div>
+                                    <h2 className="text-lg font-bold text-slate-800 mb-3 flex items-center gap-2">
+                                        <span className="bg-sky-100 text-sky-600 w-6 h-6 rounded-full flex items-center justify-center text-sm">1</span>
+                                        建立 Google 試算表
+                                    </h2>
+                                    <div className="ml-8 text-slate-600 space-y-2">
+                                        <p>前往您的 Google 雲端硬碟，新增一個空白的 <strong>Google 試算表 (Google Sheets)</strong>。</p>
+                                        <p>在工作表的第一列 (A1~E1) 依序填入以下標題（請務必一字不漏使用小寫英文）：</p>
+                                        <div className="bg-slate-50 p-3 rounded-lg font-mono text-sm border border-slate-200 inline-block">
+                                            <span className="text-sky-600 font-bold">id</span> | <span className="text-sky-600 font-bold">date</span> | <span className="text-sky-600 font-bold">stock</span> | <span className="text-sky-600 font-bold">profit</span> | <span className="text-sky-600 font-bold">note</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Step 2 */}
+                                <div>
+                                    <h2 className="text-lg font-bold text-slate-800 mb-3 flex items-center gap-2">
+                                        <span className="bg-sky-100 text-sky-600 w-6 h-6 rounded-full flex items-center justify-center text-sm">2</span>
+                                        貼上 Apps Script 程式碼
+                                    </h2>
+                                    <div className="ml-8 text-slate-600 space-y-3">
+                                        <p>在剛建立的試算表中，點擊上方選單的 <strong>「擴充功能」 ➔ 「Apps Script」</strong>。</p>
+                                        <p>清空原本編輯器內的程式碼，並將下方的程式碼複製並貼上：</p>
+                                        
+                                        <div className="relative bg-slate-900 rounded-xl overflow-hidden mt-3 shadow-md">
+                                            <div className="flex justify-between items-center bg-slate-800 px-4 py-2 text-slate-400 text-xs border-b border-slate-700">
+                                                <span className="font-mono">Code.gs</span>
+                                                <button onClick={handleCopy} className="flex items-center gap-1.5 hover:text-white transition-colors bg-slate-700 hover:bg-slate-600 px-2.5 py-1 rounded-md">
+                                                    {copied ? <><Check className="w-3.5 h-3.5 text-green-400"/> 已複製到剪貼簿</> : <><Copy className="w-3.5 h-3.5"/> 一鍵複製程式碼</>}
+                                                </button>
+                                            </div>
+                                            <pre className="p-4 text-sky-100 text-sm overflow-x-auto hide-scrollbar font-mono leading-relaxed">
+                                                {gasCode}
+                                            </pre>
+                                        </div>
+                                        <p className="text-sm mt-2 text-slate-500">貼上後，記得點擊編輯器上方的 💾 (儲存專案) 按鈕。</p>
+                                    </div>
+                                </div>
+
+                                {/* Step 3 */}
+                                <div>
+                                    <h2 className="text-lg font-bold text-slate-800 mb-3 flex items-center gap-2">
+                                        <span className="bg-sky-100 text-sky-600 w-6 h-6 rounded-full flex items-center justify-center text-sm">3</span>
+                                        部署應用程式並取得 URL
+                                    </h2>
+                                    <div className="ml-8 text-slate-600 space-y-2">
+                                        <p>點擊 Apps Script 編輯器右上方的藍色按鈕 <strong>「部署」 ➔ 「新增部署作業」</strong>。</p>
+                                        <p>點擊左側齒輪圖示，選擇 <strong>「網頁應用程式 (Web App)」</strong>。</p>
+                                        <div className="bg-amber-50 border border-amber-200 p-4 rounded-lg text-amber-800 my-3 text-sm">
+                                            <strong>⚠️ 關鍵設定：</strong><br/>
+                                            1. 執行身分：請選擇 <strong>「我 (您的信箱)」</strong><br/>
+                                            2. 誰可以存取：請務必選擇 <strong>「所有人 (Anyone)」</strong>（這非常重要，否則網頁無法連線寫入資料）
+                                        </div>
+                                        <p>點擊「部署」。(初次部署時，Google 會要求授權存取您的試算表，請點選「授予存取權」➔ 選擇帳號 ➔ 「進階」➔ 「前往...」並允許)。</p>
+                                        <p>部署完成後，將畫面上的 <strong>「網頁應用程式網址 (URL)」</strong> 複製下來。</p>
+                                    </div>
+                                </div>
+
+                                {/* Step 4 */}
+                                <div>
+                                    <h2 className="text-lg font-bold text-slate-800 mb-3 flex items-center gap-2">
+                                        <span className="bg-sky-100 text-sky-600 w-6 h-6 rounded-full flex items-center justify-center text-sm">4</span>
+                                        回到系統完成綁定
+                                    </h2>
+                                    <div className="ml-8 text-slate-600 space-y-2">
+                                        <p>回到本系統的 <strong>「歷史總帳本」</strong> 分頁。</p>
+                                        <p>點擊大標題旁的 <strong>「🔗 點此綁定 Google Sheet 雲端同步」</strong> 按鈕。</p>
+                                        <p>將剛剛取得的網址貼上並點擊「儲存綁定」，系統會立即為您同步資料，大功告成！🎉</p>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        // ==========================================
+        // 歷史帳本元件 (加入 Google Sheet 雲端同步 & CSV 匯出)
         // ==========================================
         function HistoryLedger() {
+            // 本地暫存紀錄
             const [records, setRecords] = useState(() => {
                 const saved = localStorage.getItem('twStockCalc_history_records');
                 return saved ? JSON.parse(saved) : [];
             });
 
+            // 表單狀態
             const [newDate, setNewDate] = useState(new Date().toISOString().split('T')[0]);
             const [newStock, setNewStock] = useState('');
             const [newProfit, setNewProfit] = useState('');
             const [newNote, setNewNote] = useState('');
+            
+            // Google Sheet 網址與同步狀態
+            const [gasUrl, setGasUrl] = useState(() => {
+                return localStorage.getItem('twStockCalc_gasUrl') || '';
+            });
+            const [isEditingUrl, setIsEditingUrl] = useState(false);
+            const [tempUrl, setTempUrl] = useState('');
+            const [syncStatus, setSyncStatus] = useState(gasUrl ? 'idle' : 'local'); // local, syncing, synced, error
 
+            // 確保本地資料隨時備份
             useEffect(() => {
                 localStorage.setItem('twStockCalc_history_records', JSON.stringify(records));
             }, [records]);
 
-            const handleAddRecord = () => {
+            // 一啟動時，如果有設定 GAS 網址，就自動拉取雲端資料
+            useEffect(() => {
+                if (gasUrl) fetchCloudData();
+            }, [gasUrl]);
+
+            // 儲存 GAS 網址設定
+            const handleSaveUrl = () => {
+                setGasUrl(tempUrl);
+                localStorage.setItem('twStockCalc_gasUrl', tempUrl);
+                setIsEditingUrl(false);
+            };
+
+            // 讀取 Google Sheet 資料
+            const fetchCloudData = async () => {
+                if (!gasUrl) return;
+                setSyncStatus('syncing');
+                try {
+                    // 使用 text/plain 繞過 CORS 預檢請求限制
+                    const res = await fetch(gasUrl, {
+                        method: 'POST',
+                        body: JSON.stringify({ action: 'read' }),
+                        headers: { 'Content-Type': 'text/plain;charset=utf-8' }
+                    });
+                    const result = await res.json();
+                    if (result.status === 'success' && result.data) {
+                        // 依照日期由新到舊排序
+                        const sortedData = result.data.sort((a, b) => {
+                            if (a.date !== b.date) return new Date(b.date) - new Date(a.date);
+                            return b.id - a.id;
+                        });
+                        setRecords(sortedData);
+                        setSyncStatus('synced');
+                    } else {
+                        setSyncStatus('error');
+                    }
+                } catch (err) {
+                    console.error('Fetch err:', err);
+                    setSyncStatus('error');
+                }
+            };
+
+            // 新增紀錄 (同步寫入 Google Sheet)
+            const handleAddRecord = async () => {
                 if (!newStock || newProfit === '') {
                     alert('請輸入股票名稱與獲利金額！');
                     return;
@@ -73,16 +294,84 @@
                     profit: Number(newProfit),
                     note: newNote
                 };
-                setRecords([newRecord, ...records]);
+
+                // 先更新本地畫面 (樂觀更新)
+                const newRecords = [newRecord, ...records];
+                setRecords(newRecords);
+
+                // 如果有綁定 Google Sheet，背景寫入
+                if (gasUrl) {
+                    setSyncStatus('syncing');
+                    try {
+                        const res = await fetch(gasUrl, {
+                            method: 'POST',
+                            body: JSON.stringify({ action: 'insert', record: newRecord }),
+                            headers: { 'Content-Type': 'text/plain;charset=utf-8' }
+                        });
+                        const result = await res.json();
+                        if (result.status === 'success') {
+                            setSyncStatus('synced');
+                        } else {
+                            setSyncStatus('error');
+                            alert('雲端同步失敗，但已存在本地端。');
+                        }
+                    } catch (err) {
+                        setSyncStatus('error');
+                    }
+                }
+
                 setNewStock('');
                 setNewProfit('');
                 setNewNote('');
             };
 
-            const handleDeleteRecord = (id) => {
-                if(confirm('確定要刪除這筆歷史紀錄嗎？')) {
-                    setRecords(records.filter(r => r.id !== id));
+            // 刪除紀錄 (同步從 Google Sheet 刪除)
+            const handleDeleteRecord = async (id) => {
+                if(!confirm('確定要刪除這筆歷史紀錄嗎？')) return;
+                
+                setRecords(records.filter(r => r.id !== id));
+
+                if (gasUrl) {
+                    setSyncStatus('syncing');
+                    try {
+                        const res = await fetch(gasUrl, {
+                            method: 'POST',
+                            body: JSON.stringify({ action: 'delete', id: id }),
+                            headers: { 'Content-Type': 'text/plain;charset=utf-8' }
+                        });
+                        const result = await res.json();
+                        if (result.status === 'success') {
+                            setSyncStatus('synced');
+                        } else {
+                            setSyncStatus('error');
+                        }
+                    } catch (err) {
+                        setSyncStatus('error');
+                    }
                 }
+            };
+
+            // 匯出 CSV (以防萬一還是保留給沒有綁雲端的用戶)
+            const exportToCSV = () => {
+                if (records.length === 0) {
+                    alert('目前沒有紀錄可以匯出喔！');
+                    return;
+                }
+                let csvContent = "\uFEFF"; 
+                csvContent += "日期,股票名稱,已實現淨損益,備註\n";
+                records.forEach(r => {
+                    const safeNote = r.note ? r.note.replace(/"/g, '""') : '';
+                    const safeStock = r.stock ? r.stock.replace(/"/g, '""') : '';
+                    const row = `"${r.date}","${safeStock}","${r.profit}","${safeNote}"`;
+                    csvContent += row + "\n";
+                });
+                const encodedUri = "data:text/csv;charset=utf-8," + encodeURIComponent(csvContent);
+                const link = document.createElement("a");
+                link.setAttribute("href", encodedUri);
+                link.setAttribute("download", `股票歷史總帳本_${new Date().toISOString().split('T')[0]}.csv`);
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
             };
 
             // 統計數據計算
@@ -95,15 +384,72 @@
                 <div className="p-4 md:p-8">
                     <div className="max-w-5xl mx-auto space-y-6">
                         
+                        {/* 標頭與 Google Sheet 設定區 */}
+                        <div className="bg-white p-5 rounded-2xl shadow-sm border border-slate-100">
+                            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
+                                <h1 className="text-2xl font-bold text-slate-800 flex items-center gap-2">
+                                    <Award className="w-6 h-6 text-indigo-500" /> 歷史總帳本
+                                </h1>
+                                <div className="flex flex-wrap items-center gap-3">
+                                    {gasUrl && (
+                                        <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold ${syncStatus === 'synced' ? 'bg-emerald-100 text-emerald-700 border border-emerald-200' : syncStatus === 'syncing' ? 'bg-blue-100 text-blue-700 animate-pulse' : syncStatus === 'error' ? 'bg-red-100 text-red-600 border border-red-200' : 'bg-slate-100 text-slate-500'}`}>
+                                            {syncStatus === 'syncing' ? <RefreshCw className="w-3.5 h-3.5 animate-spin" /> : <Cloud className="w-4 h-4" />}
+                                            {syncStatus === 'synced' ? '與 Google Sheet 同步中' : syncStatus === 'syncing' ? '雲端讀寫中...' : syncStatus === 'error' ? '雲端連線失敗' : '等待同步'}
+                                        </div>
+                                    )}
+                                    <button onClick={exportToCSV} className="flex items-center gap-1.5 bg-slate-100 hover:bg-slate-200 text-slate-600 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors cursor-pointer border border-slate-200">
+                                        <Download className="w-4 h-4" /> 備份成 CSV
+                                    </button>
+                                </div>
+                            </div>
+
+                            {/* Google Sheet URL 設定區 */}
+                            {isEditingUrl ? (
+                                <div className="bg-indigo-50/50 p-4 rounded-xl border border-indigo-100 mt-2">
+                                    <label className="block text-sm font-bold text-indigo-800 mb-2 flex items-center gap-2">
+                                        <LinkIcon className="w-4 h-4" /> 綁定 Google Apps Script 網址
+                                    </label>
+                                    <div className="flex flex-col sm:flex-row gap-2">
+                                        <input 
+                                            type="text" 
+                                            value={tempUrl} 
+                                            onChange={(e) => setTempUrl(e.target.value)} 
+                                            placeholder="請貼上您部署好的 Google 網頁應用程式 URL..." 
+                                            className="flex-1 p-2 border border-indigo-200 rounded-lg outline-none focus:ring-2 focus:ring-indigo-300"
+                                        />
+                                        <div className="flex gap-2">
+                                            <button onClick={handleSaveUrl} className="bg-indigo-600 text-white px-4 py-2 rounded-lg font-bold hover:bg-indigo-700 transition-colors">儲存綁定</button>
+                                            <button onClick={() => setIsEditingUrl(false)} className="bg-slate-200 text-slate-600 px-4 py-2 rounded-lg hover:bg-slate-300 transition-colors">取消</button>
+                                        </div>
+                                    </div>
+                                    <div className="text-xs text-slate-500 mt-2">綁定後，新增或刪除的紀錄都會即時同步到您的 Google 試算表中！(如果您架設在 GitHub Pages，這是保留跨裝置資料的最佳方式)</div>
+                                </div>
+                            ) : (
+                                <div className="flex items-center gap-2 mt-2">
+                                    {gasUrl ? (
+                                        <div className="text-sm text-slate-500 flex items-center gap-2">
+                                            ✅ 已綁定雲端試算表
+                                            <button onClick={() => { setTempUrl(gasUrl); setIsEditingUrl(true); }} className="text-indigo-500 hover:underline text-xs flex items-center gap-1"><Edit3 className="w-3 h-3"/> 修改網址</button>
+                                            <button onClick={fetchCloudData} className="text-blue-500 hover:underline text-xs flex items-center gap-1 ml-2"><RefreshCw className="w-3 h-3"/> 手動強制更新</button>
+                                        </div>
+                                    ) : (
+                                        <button onClick={() => { setTempUrl(''); setIsEditingUrl(true); }} className="text-sm flex items-center gap-1.5 text-indigo-600 hover:text-indigo-800 bg-indigo-50 hover:bg-indigo-100 px-3 py-1.5 rounded-lg transition-colors font-medium border border-indigo-100">
+                                            <LinkIcon className="w-4 h-4" /> 點此綁定 Google Sheet 雲端同步
+                                        </button>
+                                    )}
+                                </div>
+                            )}
+                        </div>
+
                         {/* 標頭與統計看板 */}
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                             <div className="md:col-span-1 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl shadow-md p-6 text-white flex flex-col justify-center relative overflow-hidden">
                                 <Award className="w-32 h-32 absolute -right-6 -bottom-6 text-white opacity-10" />
                                 <h2 className="text-indigo-100 font-bold mb-1">歷史累積總淨利</h2>
-                                <div className="text-4xl font-black mb-4">
+                                <div className="text-4xl font-black mb-4 relative z-10">
                                     {isTotalProfit ? '+' : ''}{totalProfit.toLocaleString()} <span className="text-lg font-medium text-indigo-200">元</span>
                                 </div>
-                                <div className="flex gap-4 text-sm bg-black/20 p-3 rounded-xl backdrop-blur-sm">
+                                <div className="flex gap-4 text-sm bg-black/20 p-3 rounded-xl backdrop-blur-sm relative z-10">
                                     <div className="flex-1">
                                         <div className="text-indigo-200">總交易筆數</div>
                                         <div className="font-bold text-lg">{records.length} 筆</div>
@@ -116,7 +462,7 @@
                             </div>
 
                             {/* 新增紀錄表單 */}
-                            <div className="md:col-span-2 bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+                            <div className="md:col-span-2 bg-white p-6 rounded-2xl shadow-sm border border-slate-100 relative">
                                 <h2 className="text-lg font-bold text-slate-700 flex items-center gap-2 mb-4">
                                     <Plus className="w-5 h-5 text-indigo-500" /> 新增歷史結算紀錄
                                 </h2>
@@ -138,8 +484,8 @@
                                         <input type="text" value={newNote} onChange={(e) => setNewNote(e.target.value)} placeholder="例：遵守紀律停利" className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-100 focus:border-indigo-400 outline-none" />
                                     </div>
                                 </div>
-                                <button onClick={handleAddRecord} className="w-full sm:w-auto bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-2.5 px-6 rounded-lg transition-colors shadow-sm">
-                                    ➕ 加入總帳本
+                                <button onClick={handleAddRecord} disabled={syncStatus === 'syncing'} className={`w-full sm:w-auto font-bold py-2.5 px-6 rounded-lg transition-colors shadow-sm ${syncStatus === 'syncing' ? 'bg-indigo-300 text-white cursor-not-allowed' : 'bg-indigo-500 hover:bg-indigo-600 text-white'}`}>
+                                    {syncStatus === 'syncing' ? '同步中...' : '➕ 加入總帳本'}
                                 </button>
                             </div>
                         </div>
@@ -1051,6 +1397,14 @@
                     <div className="bg-white border-b border-slate-200 sticky top-0 z-50 shadow-sm">
                         <div className="max-w-5xl mx-auto px-4 md:px-8 flex items-center overflow-x-auto hide-scrollbar">
                             
+                            {/* 固定分頁：雲端同步教學 (移至最前方) */}
+                            <div 
+                                onClick={() => setActiveTabId('cloud-guide')}
+                                className={`flex items-center gap-1.5 py-3 px-4 whitespace-nowrap cursor-pointer border-b-2 font-bold transition-colors ${activeTabId === 'cloud-guide' ? 'border-sky-500 text-sky-600' : 'border-transparent text-slate-500 hover:text-slate-700 hover:bg-slate-50'}`}
+                            >
+                                <Cloud className="w-5 h-5" /> 同步教學
+                            </div>
+
                             {/* 固定分頁：歷史總帳本 */}
                             <div 
                                 onClick={() => setActiveTabId('history')}
@@ -1086,6 +1440,8 @@
                     {/* 根據 activeTabId 渲染對應的元件 */}
                     {activeTabId === 'history' ? (
                         <HistoryLedger />
+                    ) : activeTabId === 'cloud-guide' ? (
+                        <CloudSyncGuide />
                     ) : (
                         <Calculator 
                             key={activeTabId} 
@@ -1103,6 +1459,3 @@
     </script>
 </body>
 </html>
-
-
-```
